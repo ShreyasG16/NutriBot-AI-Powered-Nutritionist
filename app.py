@@ -232,7 +232,7 @@ if st.session_state.show_chatbot:
         .chat-assistant {{ align-self: flex-start; background-color: #264653; padding: 12px; border-radius: 10px; 
                           max-width: 60%; margin: 10px; text-align: left; color: white; }}
         .chat-message {{ display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }}
-        .chat-user img, .chat-assistant img {{ width: 10px; height: 10px; border-radius: 50%; }} /* Smaller icons */
+        .chat-user img, .chat-assistant img {{ width: 10px; height: 10px; border-radius: 50%; }}
         .back-button {{ margin-top: 20px; }}
         </style>
     """, unsafe_allow_html=True)
@@ -257,7 +257,7 @@ if st.session_state.show_chatbot:
                 </div>
             """, unsafe_allow_html=True)
 
-    user_query = st.chat_input("Ask me anything about health, diet, and nutrition...")
+    user_query = st.chat_input("Ask me anything about health,diet...")
     if user_query:
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         response = asyncio.run(get_qwen_response(user_query))
