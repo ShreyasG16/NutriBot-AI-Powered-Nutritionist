@@ -13,6 +13,8 @@ import google.generativeai as genai
 import pdfkit
 import re
 
+st.set_page_config(page_title="NutriBot", layout="centered")
+
 load_dotenv()
 
 QWEN_API_KEY = st.secrets["QWEN_API_KEY"]
@@ -223,8 +225,6 @@ def generate_pdf(meal_plan, goals_str, additional_req):
 user_icon = get_base64_image("boy.png")
 bot_icon = get_base64_image("robot.png")
 
-
-st.set_page_config(page_title="NutriBot", layout="wide")
 
 if "show_uploader" not in st.session_state:
     st.session_state.show_uploader = False
