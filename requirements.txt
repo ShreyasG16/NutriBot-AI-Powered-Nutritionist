@@ -1,0 +1,8 @@
+streamlit
+python-dotenv
+openai
+Pillow
+requests
+aiohttp
+pdfkit
+google-generativeai
