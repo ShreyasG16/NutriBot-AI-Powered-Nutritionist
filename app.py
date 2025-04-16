@@ -12,6 +12,7 @@ from PIL import Image
 import google.generativeai as genai
 from fpdf import FPDF
 import re
+import unicodedata
 
 st.set_page_config(page_title="NutriBot", layout="wide")
 
@@ -70,8 +71,10 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
+def clean_text(text):
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+
 def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
-    
     pdf = FPDF(format="A4", unit="mm")
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
@@ -81,17 +84,16 @@ def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
     pdf.ln(5)
 
     pdf.set_font("Arial", "", 12)
-    pdf.cell(0, 6, f"Goals: {goals_str}", ln=True)
-    pdf.cell(0, 6, f"Additional Requirements: {additional_req or 'None'}", ln=True)
+    pdf.cell(0, 6, f"Goals: {clean_text(goals_str)}", ln=True)
+    pdf.cell(0, 6, f"Additional Requirements: {clean_text(additional_req or 'None')}", ln=True)
     pdf.ln(5)
 
     lines = meal_plan.split("\n")
     for line in lines:
-        stripped = line.strip()
- 
+        stripped = clean_text(line.strip())
         stripped = re.sub(r'^#+\s*', '', stripped)
         stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
-        
+
         is_heading = (
             len(stripped) <= 100 
             and re.match(r'^[A-Z][A-Za-z0-9\s\(\)\-:]*$', stripped)
@@ -103,21 +105,21 @@ def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
             pdf.set_font("Arial", "", 12)
 
         pdf.multi_cell(0, 6, stripped)
-    
+
     pdf.ln(5)
 
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 6, "Authorized by Dr. NutriBot", ln=True, align="C")
     pdf.ln(5)
-    
+
     pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 6, "𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱", ln=True, align="C")
+    pdf.cell(0, 6, clean_text("𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱"), ln=True, align="C")
     pdf.ln(5)
-    
+
     pdf.set_font("Arial", "", 10)
     pdf.cell(0, 6, "Made with ❤️ by Shreyas", ln=True, align="C")
 
-    pdf_bytes = pdf.output(dest="S").encode("latin1")  # "S" returns as string
+    pdf_bytes = pdf.output(dest="S").encode("latin1") 
     st.download_button(
         label="📥 Download Prescription",
         data=pdf_bytes,
