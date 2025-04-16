@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image
 import google.generativeai as genai
-import pdfkit
+from weasyprint import HTML
 import re
 
 st.set_page_config(page_title="NutriBot", layout="wide")
@@ -71,17 +71,19 @@ def get_base64_image(image_path):
         return base64.b64encode(img_file.read()).decode()
 
 def generate_pdf(meal_plan, goals_str, additional_req):
+    # Format dynamic headers to ensure proper styling
     def format_dynamic_headers(text):
-
         lines = text.split('\n')
         formatted_lines = []
 
         for line in lines:
             stripped = line.strip()
 
+            # Remove Markdown heading symbols and bold markers
             stripped = re.sub(r'^#+\s*', '', stripped)
             stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
 
+            # Apply bold to headings with a specific pattern
             if (
                 len(stripped) <= 100 and
                 re.match(r'^[A-Z][a-zA-Z\s\d\(\)\-:]*$', stripped) and
@@ -94,10 +96,10 @@ def generate_pdf(meal_plan, goals_str, additional_req):
 
         return "<br>".join(formatted_lines)
 
-
-
+    # Apply header formatting to the meal plan
     meal_plan_html = format_dynamic_headers(meal_plan)
 
+    # HTML structure for the PDF
     pdf_html = f"""
     <html>
     <head>
@@ -187,23 +189,17 @@ def generate_pdf(meal_plan, goals_str, additional_req):
     </html>
     """
 
-    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
+    # Generate PDF using WeasyPrint
+    html = HTML(string=pdf_html)
+    pdf_data = html.write_pdf()
 
-    options = {
-        'quiet': '',
-        'disable-smart-shrinking': '',
-        'page-size': 'A4',
-        'margin-top': '5mm',
-        'margin-bottom': '5mm',
-        'margin-left': '5mm',
-        'margin-right': '5mm',
-        'encoding': 'UTF-8'
-    }
-
-    pdfkit.from_string(pdf_html, "mealPlan.pdf", options=options, configuration=config)
-
-    with open("mealPlan.pdf", "rb") as pdf_file:
-        st.download_button("📥 Download Prescription", pdf_file, "mealPlan.pdf", "application/pdf")
+    # Provide the PDF as a download button in Streamlit
+    st.download_button(
+        label="📥 Download Prescription",
+        data=pdf_data,
+        file_name="mealPlan.pdf",
+        mime="application/pdf"
+    )
 
 
 
