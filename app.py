@@ -40,6 +40,21 @@ async def get_qwen_response(prompt):
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
+# Apply the cache decorator
+@st.cache_data
+def cached_get_qwen_response(prompt):
+    return asyncio.run(get_qwen_response(prompt))
+
+# In your chatbot section, use the cached function
+if st.session_state.show_chatbot:
+    # ... existing code ...
+    user_query = st.chat_input("Ask me anything about health, diet, and nutrition...")
+    if user_query:
+        st.session_state.chat_history.append({"role": "user", "content": user_query})
+        response = cached_get_qwen_response(user_query) # Use the cached function
+        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        st.rerun()
+
 # meal analysis from Gemini
 def get_gemini_response(image, prompt):
     try:
