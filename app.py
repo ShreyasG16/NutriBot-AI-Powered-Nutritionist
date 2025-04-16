@@ -213,8 +213,6 @@ if st.session_state.show_meal_plan:
         st.subheader("Your Personalized Meal Plan 📋")
         st.write(response)
 
-        generate_pdf(response, goals_str, additional_req)
-
     if st.button("⬅️ Back to Main Page", key="back_meal"):
         st.session_state.show_meal_plan = False
         st.session_state.show_uploader = False
