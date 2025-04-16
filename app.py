@@ -72,8 +72,7 @@ def get_base64_image(image_path):
         return base64.b64encode(img_file.read()).decode()
 
 def clean_text(text):
-    text = unicodedata.normalize("NFKD", text)
-    return ''.join(c for c in text if unicodedata.category(c)[0] != 'C')
+    return text.encode("latin-1", "ignore").decode("latin-1")
 
 def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
     pdf = FPDF(format="A4", unit="mm")
@@ -115,11 +114,12 @@ def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
     pdf.ln(5)
 
     pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 6, clean_text("𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱"), ln=True, align="C") 
+    pdf.cell(0, 6, clean_text("NutriBot"), ln=True, align="C") 
     pdf.ln(5)
 
     pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, "Made with ❤️ by Shreyas", ln=True, align="C")  
+    pdf.cell(0, 6, clean_text("Made with love by Shreyas"), ln=True, align="C") 
+
     pdf_bytes = pdf.output(dest="S").encode("latin1")
 
     st.download_button(
