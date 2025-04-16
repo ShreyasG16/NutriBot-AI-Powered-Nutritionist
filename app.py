@@ -1,18 +1,17 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import os
+import re
+import unicodedata
 import requests
 import json
 import asyncio
 import aiohttp
 import base64
+import google.generativeai as genai
 from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image
-import google.generativeai as genai
-import pdfkit
-import re
-import unicodedata
 
 st.set_page_config(page_title="NutriBot", layout="wide")
 
@@ -70,143 +69,6 @@ def input_image_setup(uploaded_file):
 def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
-
-def clean_text(text):
-    return text.encode("latin-1", "ignore").decode("latin-1")
-
-def generate_pdf(meal_plan, goals_str, additional_req):
-    def format_dynamic_headers(text):
-        lines = text.split('\n')
-        formatted_lines = []
-
-        for line in lines:
-            stripped = line.strip()
-            stripped = re.sub(r'^#+\s*', '', stripped)
-            stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
-
-            if (
-                len(stripped) <= 100 and
-                re.match(r'^[A-Z][a-zA-Z\s\d\(\)\-:]*$', stripped) and
-                not stripped.startswith("-") and
-                not stripped.startswith("•")
-            ):
-                formatted_lines.append(f"<b>{stripped}</b>")
-            else:
-                formatted_lines.append(stripped)
-
-        return "<br>".join(formatted_lines)
-
-    meal_plan_html = format_dynamic_headers(meal_plan)
-
-    pdf_html = f"""
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                font-size: 14px;
-                color: black;
-                margin: 10px;
-                padding: 10px;
-                border: 2px solid #2a9d8f;
-                border-radius: 10px;
-            }}
-
-            h1 {{
-                text-align: center;
-                font-size: 16px;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }}
-
-            .meta {{
-                font-size: 12px;
-                margin-bottom: 10px;
-            }}
-
-            .meta b {{
-                font-weight: bold;
-            }}
-
-            .meal-plan {{
-                font-size: 11px;
-                line-height: 1.6;
-                background: #f9f9f9;
-                padding: 10px;
-                border-radius: 5px;
-            }}
-
-            .footer {{
-                text-align: center;
-                font-size: 10px;
-                color: #555;
-                margin-top: 20px;
-            }}
-
-            .signature {{
-                font-family: "Brush Script MT", cursive;
-                font-size: 16px;
-                text-align: center;
-                margin-top: 20px;
-            }}
-
-            .authorized {{
-                text-align: center;
-                margin-top: 30px;
-                font-size: 12px;
-                font-weight: bold;
-            }}
-        </style>
-    </head>
-    <body>
-        <h1>NutriBot Prescription</h1>
-
-        <div class="meta">
-            <p><b>Goals:</b> {goals_str}</p>
-            <p><b>Additional Requirements:</b> {additional_req if additional_req else "None"}</p>
-        </div>
-
-        <div class="meal-plan">
-            {meal_plan_html}
-        </div>
-
-        <div class="authorized">
-            Authorized by<br>Dr. NutriBot
-        </div>
-
-        <div class="signature">
-            <p>__________________________</p>
-            <p>𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱</p>
-        </div>
-
-        <div class="footer">
-            <p>Made with ❤️ by Shreyas</p>
-        </div>
-    </body>
-    </html>
-    """
-
-    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')  # Update the path if needed
-
-    options = {
-        'quiet': '',
-        'disable-smart-shrinking': '',
-        'page-size': 'A4',
-        'margin-top': '5mm',
-        'margin-bottom': '5mm',
-        'margin-left': '5mm',
-        'margin-right': '5mm',
-        'encoding': 'UTF-8'
-    }
-
-    # Generate the PDF from the string
-    pdfkit.from_string(pdf_html, "mealPlan.pdf", options=options, configuration=config)
-
-    # Provide the download button in Streamlit
-    with open("mealPlan.pdf", "rb") as pdf_file:
-        st.download_button("📥 Download Prescription", pdf_file, "mealPlan.pdf", "application/pdf")
-
 
 
 user_icon = get_base64_image("boy.png")
