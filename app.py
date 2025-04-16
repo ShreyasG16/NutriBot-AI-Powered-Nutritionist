@@ -20,6 +20,14 @@ GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
+if "show_uploader" not in st.session_state:
+    st.session_state.show_uploader = False
+if "show_chatbot" not in st.session_state:
+    st.session_state.show_chatbot = False
+if "show_meal_plan" not in st.session_state:  
+    st.session_state.show_meal_plan = False
+
+
 #chatbot response from Qwen 2.5 API
 async def get_qwen_response(prompt):
     try:
