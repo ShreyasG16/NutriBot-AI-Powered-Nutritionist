@@ -4,5 +4,5 @@ openai
 Pillow
 requests
 aiohttp
-pdfkit==1.0.0
+pdfkit
 google-generativeai
