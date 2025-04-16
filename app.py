@@ -15,8 +15,8 @@ import re
 
 load_dotenv()
 
-QWEN_API_KEY = os.getenv("QWEN_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+QWEN_API_KEY = st.secrets["QWEN_API_KEY"]
+GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
