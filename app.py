@@ -72,13 +72,14 @@ def get_base64_image(image_path):
         return base64.b64encode(img_file.read()).decode()
 
 def clean_text(text):
-    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    text = unicodedata.normalize("NFKD", text)
+    return ''.join(c for c in text if unicodedata.category(c)[0] != 'C')
 
 def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
     pdf = FPDF(format="A4", unit="mm")
     pdf.set_auto_page_break(auto=True, margin=10)
     pdf.add_page()
-    
+
     pdf.set_font("Arial", "B", 16)
     pdf.cell(0, 10, "NutriBot Prescription", ln=True, align="C")
     pdf.ln(5)
@@ -90,36 +91,37 @@ def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
 
     lines = meal_plan.split("\n")
     for line in lines:
-        stripped = clean_text(line.strip())
+        stripped = line.strip()
         stripped = re.sub(r'^#+\s*', '', stripped)
         stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
 
         is_heading = (
-            len(stripped) <= 100 
+            len(stripped) <= 100
             and re.match(r'^[A-Z][A-Za-z0-9\s\(\)\-:]*$', stripped)
             and not stripped.startswith(("-", "•"))
         )
+
         if is_heading:
             pdf.set_font("Arial", "B", 14)
         else:
             pdf.set_font("Arial", "", 12)
 
-        pdf.multi_cell(0, 6, stripped)
+        cleaned = clean_text(stripped)
+        pdf.multi_cell(0, 6, cleaned)
 
     pdf.ln(5)
-
     pdf.set_font("Arial", "B", 12)
     pdf.cell(0, 6, "Authorized by Dr. NutriBot", ln=True, align="C")
     pdf.ln(5)
 
     pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 6, clean_text("𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱"), ln=True, align="C")
+    pdf.cell(0, 6, clean_text("𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱"), ln=True, align="C") 
     pdf.ln(5)
 
     pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, "Made with ❤️ by Shreyas", ln=True, align="C")
+    pdf.cell(0, 6, "Made with ❤️ by Shreyas", ln=True, align="C")  
+    pdf_bytes = pdf.output(dest="S").encode("latin1")
 
-    pdf_bytes = pdf.output(dest="S").encode("latin1") 
     st.download_button(
         label="📥 Download Prescription",
         data=pdf_bytes,
