@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image
 import google.generativeai as genai
-from fpdf import FPDF
+import pdfkit
 import re
 import unicodedata
 
@@ -74,60 +74,138 @@ def get_base64_image(image_path):
 def clean_text(text):
     return text.encode("latin-1", "ignore").decode("latin-1")
 
-def generate_pdf(meal_plan: str, goals_str: str, additional_req: str):
-    pdf = FPDF(format="A4", unit="mm")
-    pdf.set_auto_page_break(auto=True, margin=10)
-    pdf.add_page()
+def generate_pdf(meal_plan, goals_str, additional_req):
+    def format_dynamic_headers(text):
+        lines = text.split('\n')
+        formatted_lines = []
 
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "NutriBot Prescription", ln=True, align="C")
-    pdf.ln(5)
+        for line in lines:
+            stripped = line.strip()
+            stripped = re.sub(r'^#+\s*', '', stripped)
+            stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
 
-    pdf.set_font("Arial", "", 12)
-    pdf.cell(0, 6, f"Goals: {clean_text(goals_str)}", ln=True)
-    pdf.cell(0, 6, f"Additional Requirements: {clean_text(additional_req or 'None')}", ln=True)
-    pdf.ln(5)
+            if (
+                len(stripped) <= 100 and
+                re.match(r'^[A-Z][a-zA-Z\s\d\(\)\-:]*$', stripped) and
+                not stripped.startswith("-") and
+                not stripped.startswith("•")
+            ):
+                formatted_lines.append(f"<b>{stripped}</b>")
+            else:
+                formatted_lines.append(stripped)
 
-    lines = meal_plan.split("\n")
-    for line in lines:
-        stripped = line.strip()
-        stripped = re.sub(r'^#+\s*', '', stripped)
-        stripped = re.sub(r'\*\*(.*?)\*\*', r'\1', stripped)
+        return "<br>".join(formatted_lines)
 
-        is_heading = (
-            len(stripped) <= 100
-            and re.match(r'^[A-Z][A-Za-z0-9\s\(\)\-:]*$', stripped)
-            and not stripped.startswith(("-", "•"))
-        )
+    meal_plan_html = format_dynamic_headers(meal_plan)
 
-        if is_heading:
-            pdf.set_font("Arial", "B", 14)
-        else:
-            pdf.set_font("Arial", "", 12)
+    pdf_html = f"""
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: black;
+                margin: 10px;
+                padding: 10px;
+                border: 2px solid #2a9d8f;
+                border-radius: 10px;
+            }}
 
-        cleaned = clean_text(stripped)
-        pdf.multi_cell(0, 6, cleaned)
+            h1 {{
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }}
 
-    pdf.ln(5)
-    pdf.set_font("Arial", "B", 12)
-    pdf.cell(0, 6, "Authorized by Dr. NutriBot", ln=True, align="C")
-    pdf.ln(5)
+            .meta {{
+                font-size: 12px;
+                margin-bottom: 10px;
+            }}
 
-    pdf.set_font("Arial", "I", 12)
-    pdf.cell(0, 6, clean_text("NutriBot"), ln=True, align="C") 
-    pdf.ln(5)
+            .meta b {{
+                font-weight: bold;
+            }}
 
-    pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, clean_text("Made with love by Shreyas"), ln=True, align="C") 
+            .meal-plan {{
+                font-size: 11px;
+                line-height: 1.6;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 5px;
+            }}
 
-    pdf_bytes = pdf.output(dest="S").encode("latin1")
+            .footer {{
+                text-align: center;
+                font-size: 10px;
+                color: #555;
+                margin-top: 20px;
+            }}
 
-    st.download_button(
-        label="📥 Download Prescription",
-        data=pdf_bytes,
-        file_name="mealPlan.pdf",
-        mime="application/pdf"
-    )
+            .signature {{
+                font-family: "Brush Script MT", cursive;
+                font-size: 16px;
+                text-align: center;
+                margin-top: 20px;
+            }}
+
+            .authorized {{
+                text-align: center;
+                margin-top: 30px;
+                font-size: 12px;
+                font-weight: bold;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>NutriBot Prescription</h1>
+
+        <div class="meta">
+            <p><b>Goals:</b> {goals_str}</p>
+            <p><b>Additional Requirements:</b> {additional_req if additional_req else "None"}</p>
+        </div>
+
+        <div class="meal-plan">
+            {meal_plan_html}
+        </div>
+
+        <div class="authorized">
+            Authorized by<br>Dr. NutriBot
+        </div>
+
+        <div class="signature">
+            <p>__________________________</p>
+            <p>𝔑𝔲𝔱𝔯𝔦𝔅𝔬𝔱</p>
+        </div>
+
+        <div class="footer">
+            <p>Made with ❤️ by Shreyas</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')  # Update the path if needed
+
+    options = {
+        'quiet': '',
+        'disable-smart-shrinking': '',
+        'page-size': 'A4',
+        'margin-top': '5mm',
+        'margin-bottom': '5mm',
+        'margin-left': '5mm',
+        'margin-right': '5mm',
+        'encoding': 'UTF-8'
+    }
+
+    # Generate the PDF from the string
+    pdfkit.from_string(pdf_html, "mealPlan.pdf", options=options, configuration=config)
+
+    # Provide the download button in Streamlit
+    with open("mealPlan.pdf", "rb") as pdf_file:
+        st.download_button("📥 Download Prescription", pdf_file, "mealPlan.pdf", "application/pdf")
 
 
 
