@@ -19,12 +19,12 @@ def get_rag_answer(query):
     }
 
 
-# Loading.. embedding and FAISS DB
+# Loading... embedding and FAISS DB
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 DB_FAISS_PATH = "./chatbot/vectorstore/db_faiss"
 db = FAISS.load_local(DB_FAISS_PATH, embedding_model, allow_dangerous_deserialization=True)
 
-# Loading LLaMA Model
+# Loading.. LLaMA Model
 llm = OllamaLLM(model="llama3:8b", temperature=0.5)
 
 # Prompt
