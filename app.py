@@ -15,6 +15,7 @@ from PIL import Image
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
+os.environ["PYTORCH_NO_CUSTOM_CLASS"] = "1"
 
 st.set_page_config(page_title="NutriBot", layout="wide")
 
@@ -33,7 +34,7 @@ if "show_meal_plan" not in st.session_state:
     st.session_state.show_meal_plan = False
 
 
-#chatbot response from Qwen 2.5 API
+# Meal plan response from Qwen 2.5 
 async def get_qwen_response(prompt):
     try:
         async with aiohttp.ClientSession() as session:
@@ -53,7 +54,7 @@ async def get_qwen_response(prompt):
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
-# meal analysis from Gemini
+# Meal analysis from Gemini-Flash-1.0
 def get_gemini_response(image, prompt):
     try:
         model = genai.GenerativeModel('gemini-2.0-flash')
@@ -223,7 +224,7 @@ if st.session_state.show_meal_plan:
         st.rerun()
 
 
-# Chatbot Page (Qwen 2.5 API)
+# RAG based Chatbot Integration - LLaMA3-8B
 if st.session_state.show_chatbot:
     st.header("Chat with NutriBot 💬")
 
