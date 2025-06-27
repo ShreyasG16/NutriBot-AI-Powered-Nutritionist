@@ -4,8 +4,4 @@ openai
 Pillow
 requests
 aiohttp
-<<<<<<< HEAD
-pdfkit
-=======
->>>>>>> e76e8d0 (updated .gitignore)
 google-generativeai

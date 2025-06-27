@@ -70,12 +70,9 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e76e8d0 (updated .gitignore)
 user_icon = get_base64_image("boy.png")
 bot_icon = get_base64_image("robot.png")
+
 
 
 if "show_uploader" not in st.session_state:
