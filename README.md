@@ -1,57 +1,166 @@
-# NutriBot: AI Powered Nutritionist
-
-NutriBot is an AI-driven web application designed to provide personalized nutritional assistance using advanced generative models and image analysis. The application aims to empower users to make informed dietary decisions by leveraging cutting-edge AI tools in an easy-to-use Streamlit interface.
-
----
-
-## 🔍 Features
-
-- **AI-Powered Meal Analysis**  
-  Upload a photo of your meal and get **real-time calorie estimates** and **dietary concern analysis** using **Gemini-Flash-1.0**.
-
-- **Personalized Meal Planning**  
-  Generate **custom meal plans** tailored to user goals (e.g., weight loss, muscle gain, diabetic-safe, etc.) powered by **Qwen 2.5**.
-
-- **PDF Export**  
-  Download customized meal plans and prescriptions in **PDF format** for easy access and sharing.
-
-- **Virtual Nutrition Assistant**  
-  Interact with a real-time **chat assistant** built on **Qwen 2.5**, capable of answering nutrition-related queries and providing expert dietary advice.
+# NutriBot - Hallucination-Resistant AI Nutritionist
+**NutriBot** is a research-driven, AI-powered nutrition assistant developed under the guidance of **Dr. Ganesh Bagler** at the **Complex Systems Laboratory (IIIT-Delhi)**. It serves as a **one-stop platform** for intelligent nutritional support through **visual meal analysis**, **personalized diet planning**, and **hallucination-free dietary question answering**.
 
 ---
 
-## 🛠️ Tools & Technologies
+## 🚀 Core Features
 
-- **Frontend**: [Streamlit](https://streamlit.io/)
-- **AI Models**:
-  - Gemini-Flash-1.0 (Image Analysis & Calorie Estimation)
-  - Qwen 2.5 (Diet Plan Generation & Chat Assistant)
-- **Backend**: Python
-- **Output Formats**: PDF
+### 🔍 Retrieval-Augmented Generation (RAG) Powered Nutrition Q&A
+- Built with **LangChain**, **FAISS**, and **LLaMA3 (8B)**.
+- Curated PDF documents (e.g., Indian food guidelines, diagnosis protocols) are:
+  - Chunked intelligently.
+  - Embedded using **HuggingFace's all-MiniLM-L6-v2**.
+  - Stored into **FAISS vector database** for similarity search.
+- Ensures **reliable, grounded answers** to health and nutrition queries—**mitigating LLM hallucinations**.
+
+### 🖼️ Gemini Vision for Meal Image Analysis
+- Integrated **Gemini-Flash-1.0 (Vision)** via API to:
+  - Analyze meal images uploaded by users.
+  - Estimate calories and flag dietary concerns.
+- Enables quick, **real-time visual diet assessment**.
+
+### 🧠 Personalized Meal Planning with Qwen 2.5
+- Accepts user goals (e.g., weight loss, diabetic diet).
+- Generates **personalized and culturally appropriate meal plans**.
 
 ---
 
-## 🚀 How to Run Locally
+## 🛠 Tech Stack
 
-1. **Clone the Repository**
-   
-   ```bash
-   git clone https://github.com/yourusername/NutriBot-AI-Nutritionist.git
-   cd NutriBot-AI-Nutritionist
-   
-2. **Create a Virtual Environment**
-   
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-3. **Install Dependencies**
-   
-   ```bash
-   pip install -r requirements.txt
-   
-4. **Run the App**
+| Component | Tech Used |
+|----------|-----------|
+| Web UI   | Streamlit |
+| QnA LLM  | LangChain and Ollama (locally served) |
+| Image Analysis | Gemini Flash-1.0 |
+| Meal Planning | Qwen 2.5 |
+| Vector DB | FAISS |
+| Embeddings | HuggingFace (MiniLM) |
+| Frameworks | LangChain, Streamlit |
 
-   ```bash
-   streamlit run app.py
+---
+
+## 🧩 Folder Structure
+
+```
+NutriBot App/
+├── app.py
+├── background.html
+├── .streamlit/
+│   └── secrets.toml
+├── chatbot/
+│   ├── connectWithLLM.py
+│   ├── memoryForLLM.py
+│   ├── requirements.txt
+│   ├── data/
+│   └── vectorstore/
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 🧪 Installation Instructions
+
+### 🛠️ 1. System Prerequisites
+
+- Python 3.10+
+- LLaMA3 (8B) installed locally
+- Instructions for LLaMA3 Setup via Ollama
+
+```bash
+# 1. Download and install Ollama from:
+https://ollama.com/download
+
+# 2. Pull and run LLaMA3 8B
+ollama pull llama3:8b
+ollama run llama3
+```
+
+In your LangChain code, import:
+
+```python
+from langchain_ollama import OllamaLLM
+```
+
+---
+- Internet connection for Gemini & Qwen APIs
+- Linux server recommended
+
+### 🌱 2. Setup Root Environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### Root `requirements.txt`
+
+```
+streamlit
+python-dotenv
+openai
+Pillow
+requests
+aiohttp
+google-generativeai
+```
+
+### 💬 3. Setup Chatbot Module
+
+```bash
+cd chatbot
+pip install -r requirements.txt
+```
+
+#### Chatbot `requirements.txt`
+
+```
+langchain
+langchain_community
+langchain_huggingface 
+faiss-cpu
+sentence-transformers
+dotenv
+```
+
+---
+
+## 🔐 Secrets & API Keys
+
+Create a file at `.streamlit/secrets.toml` and include the following:
+
+```toml
+[api_keys]
+GEMINI_API_KEY = "your_gemini_api_key"
+QWEN_API_KEY = "your_qwen_api_key"
+```
+
+---
+
+## 🎮 Running the App
+
+```bash
+streamlit run app.py
+```
+
+Then visit: [http://localhost:8501](http://localhost:8501)
+
+---
+## 📸 Sample Output
+
+NutriBot leveraging FAISS-based vector search to retrieve accurate context for user queries.
+
+![NutriBot Response](result.png)
+
+## 🧠 Credits
+
+- **Dr. Ganesh Bagler** – Project Supervisor, CoSyLab
+- **Shreyas Gore** – Developer, M.Tech CSE
+
+---
+
+## 📎 License
+
+For research and academic use under IIIT-Delhi guidelines. All Rights Reserved with @CoSyLab, RnD Block, IIIT Delhi
 
