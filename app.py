@@ -12,6 +12,9 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from chatbot.connectWithLLM import get_rag_answer
 from PIL import Image
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
 
 st.set_page_config(page_title="NutriBot", layout="wide")
 
