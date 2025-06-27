@@ -10,7 +10,7 @@ import aiohttp
 import base64
 import google.generativeai as genai
 from dotenv import load_dotenv
-from openai import OpenAI
+from chatbot.connectWithLLM import get_rag_answer
 from PIL import Image
 
 st.set_page_config(page_title="NutriBot", layout="wide")
@@ -70,7 +70,10 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e76e8d0 (updated .gitignore)
 user_icon = get_base64_image("boy.png")
 bot_icon = get_base64_image("robot.png")
 
@@ -260,8 +263,15 @@ if st.session_state.show_chatbot:
     user_query = st.chat_input("Ask me anything about health,diet...")
     if user_query:
         st.session_state.chat_history.append({"role": "user", "content": user_query})
-        response = asyncio.run(get_qwen_response(user_query))
-        st.session_state.chat_history.append({"role": "assistant", "content": response})
+        rag_result = get_rag_answer(user_query)
+        response_text = rag_result["answer"]
+        source_refs = rag_result["sources"]
+
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": response_text + "<br><br><b>📚 Sources:</b><br>" + "<br>".join(source_refs)
+        })
+
         st.rerun()
     
     st.markdown("<br><br>", unsafe_allow_html=True)
