@@ -1,5 +1,5 @@
-# NutriBot - Hallucination-Resistant AI Nutritionist
-**NutriBot** is a research-driven, AI-powered nutrition assistant developed under the guidance of **Dr. Ganesh Bagler** at the **Complex Systems Laboratory (IIIT-Delhi)**. It serves as a **one-stop platform** for intelligent nutritional support through **visual meal analysis**, **personalized diet planning**, and **hallucination-free dietary question answering**.
+# Hallucination Resistant AI Nutritionist
+It is a research-driven, AI-powered nutrition assistant developed under the guidance of **Dr. Ganesh Bagler** at the **Complex Systems Laboratory (IIIT-Delhi)**. It serves as a **one-stop platform** for intelligent nutritional support through **visual meal analysis**, **personalized diet planning**, and **hallucination-free dietary question answering**.
 
 ---
 
